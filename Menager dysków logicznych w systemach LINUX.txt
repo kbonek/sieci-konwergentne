@@ -1,0 +1,52 @@
+Co to jest LVM (Logical Volume Manager)
+Logical Volume Manager – mechanizm systemu operacyjnego do zarz¹dzania przestrzeni¹ pamiêci masowej. System zaawansowanego zarz¹dzania przestrzeni¹ dyskow¹. Pozwala na po³¹czenie partycji znajduj¹cych siê na ró¿nych urz¹dzeniach pamiêci masowej w jeden dysk wirtualny, który jest o wiele bardziej elastyczny, ni¿ klasyczne partycje dyskowe. Jego rozmiar nie jest zdefiniowany na sta³e – jeœli zachodzi taka potrzeba, istnieje mo¿liwoœæ jego rozszerzenia o now¹ przestrzeñ pamiêciow¹. Obs³uga woluminów logicznych zaimplementowana jest w wiêkszoœci systemów operacyjnych, mo¿e ró¿niæ siê funkcjonalnoœci¹.
+
+Struktur:
+PV (physical volumes) - fizyczne woluminy: s¹ bezpoœrednio zwi¹zane z partycjami dyskowymi (np. /dev/hda1, /dev/sdb3). ), które mog¹ byæ fizycznymi dyskami twardymi, partycjami lub numerami jednostek logicznych (LUN) na zewnêtrznym urz¹dzeniu przechowywania danych. Aby u¿yæ urz¹dzenia dla woluminu logicznego LVM, urz¹dzenie musi zostaæ zainicjowane jako wolumin fizyczny (PV). Inicjowanie urz¹dzenia blokowego jako woluminu fizycznego powoduje umieszczenie etykiety w pobli¿u pocz¹tku urz¹dzenia. Woluminy fizyczne organizowane s¹ w ci¹gi niewielkich bloków zwanych ekstentami fizycznymi.
+
+VG (volume groups) - grupy woluminów: sk³adaj¹ siê z co najmniej jednego PV, ich wielkoœæ to suma objêtoœci wszystkich PV nale¿¹cych do danej grupy. Fizyczne ekstenty i grupy woluminów maj¹ swoje logiczne odpowiedniki. W podstawowym scenariuszu s¹ one mapowane jeden-do-jednego, tj. jednemu logicznemu ekstentowi odpowiada dok³adnie jeden ekstent fizyczny. Mo¿liwa jest jednak sytuacja, w której logiczny ekstent jest mapowany na kilka ekstentów fizycznych, z których ka¿dy zawiera dok³adnie te same informacje. Uzyskane miejsce dyskowe mo¿e byæ dowolnie dysponowane pomiêdzy kolejne LV.
+
+LV (logical volumes) - woluminy logiczne: s¹ obszarami u¿ytecznymi dla systemu (podobnie jak partycje dyskowe). LV s¹ obszarami wydzielonymi z VG, zatem suma wielkoœci woluminów nie mo¿e przekraczaæ objêtoœci VG, do którego nale¿¹. Logiczne ekstenty ³¹czone s¹ w logiczne woluminy (ang. logical volume), które s¹ przez system operacyjny traktowane jako ci¹g³e bloki bajtów i mog¹ byæ u¿ywane dok³adnie w taki sam sposób, jak partycje. System widzi wolumin jako ci¹g³y obszar przestrzeni dyskowej, w rzeczywistoœci fizyczne ekstenty u¿yte do jego skonstruowania mog¹ byæ rozrzucone po ca³ym fizycznym dysku lub te¿ po kilku dyskach.
+
+Instalacja PV, VG - sprawdzanie
+rpm-qa-lvm sprawdzanie czy pakiet LVM jest dostêpny
+
+yum-install-lvm2 w przypadku braku pakietu, polecenie instalacyjne.
+
+*pakiet LVM jest czêœci¹ podstawowa instalacji szanse na jego pominiêcie s¹ niewielkie. Zdarza siê jednak, jeœli wybierzemy minimaln¹ metodê instalacji pakietu, LVM nie zostanie zainstalowany. Trzeba zainstalowaæ osobno pakiet LVM.
+
+pvs-blank wyœwietlanie bie¿¹cego woluminu fizycznego.
+
+#pvcreate polecenie umo¿liwi stworzenie objêtoœci fizycznej (PV) z dysku twardego, tworzy nag³ówek na ka¿dej dostarczonej partycji.
+
+Je¿eli jest jeden dysk twardy, tworzymy jeden PV na najwiêkszej partycji. Gdy jest wiêcej dysków to na ka¿dym tworzymy PV z partycji.
+
+Do utworzenia partycji musisz ustawiæ typ na „Linux LVM”
+
+Przy u¿ywaniu polecenia #pvcreate musimy siê upewniæ ¿e celujemy w odpowiednie miejsce, polecenie to mo¿e spowodowaæ utratê danych.
+
+Fdisk-l- wyœwietli listê bie¿¹cych partycji, punkt, i typ do ich montowania.
+
+Do stworzenia woluminu fizycznego PV potrzebna jest jedna partycja oznaczona jako VLM Single-lvm-partiton
+
+parted-last-partiton-end polecenie do zapisu koñcowego punktu partycji.
+
+parted-mkpart polecenie do stworzenia nowej partycji
+
+parted-new-partition zweryfikowanie nowej partycji i jej numeru.
+
+parted-print wyœwietlanie bie¿¹cej partycji
+
+Komenda parted-quite-command wymusi aby j¹dra odczyta³o now¹ tablicê partycji.
+
+pvdisplay by zweryfikowaæ utworzone woluminy - œledzenia woluminów.
+
+Mo¿na utworzyæ grupê woluminów z pojedynczego woluminu i dodaæ do niej wiêcej woluminów za pom¹c¹ polecenia vgextend lub utworzyæ grupê woluminów za pom¹c¹ komendy: #vgcreate VolGrup / dev / sad / dev /sad7 / dev / sdb1
+
+Tworzenie logicznego woluminu odbywa siê za pomoc¹ polecenia: lvcreate
+
+lvdisplay weryfikacja utworzonych woluminów
+
+Podaj¹c nazwê nowego woluminu, jego rozmiar i grupê, na której bêdzie dzia³a³a
+
+#lvcreate –L [size] [volume_group] –n [logial_volume] pozwala utworzyæ dwie partycjê
